@@ -4,4 +4,4 @@ MVC katmanlı mimari ile oluşturulmuş dosya paylaşım sitesi.
 
 Code First veritabanı yapısı.
 
-Canlı Test: redux.saityilmaz.com
+Canlı Test: <a href="redux.saityilmaz.com">redux.saityilmaz.com</a>
