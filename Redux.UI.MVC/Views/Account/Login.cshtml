@@ -1,0 +1,131 @@
+﻿@model User
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Giriş | Redux</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/fontawesome5/css/all.min.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Custom/Account.css" rel="stylesheet" />
+</head>
+<body class="screen-cover login">
+    <div id="content">
+        <div id="login" class="content-sm">
+            <h2 class="light styled text-center">Giriş Yap</h2>
+            <div class="panel panel-default panel-faded">
+                <div class="panel-body">
+                    @using (Html.BeginForm("", "", FormMethod.Post, new { onSubmit = "return logincontrol();" }))
+                    {
+
+                        <div class="alert alert-danger alert-error collapse">Kullanıcı adı ve şifre kombinasyonunuz yanlış.</div>
+
+                        <div class="form-group">
+                            <label class="control-label" for="user_username">Kullanıcı Adı</label>
+                            <input required autofocus="autofocus" class="form-control input-lg" type="text" name="username" id="username">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="user_password">Şifre</label>
+                            <input required autocomplete="off" class="form-control input-lg" type="password" name="password" id="password">
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" value="1" checked="checked" name="rememberme" id="rememberme">
+                            <label for="user_remember_me">Beni hatırla</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Giriş yap" class="btn btn-primary btn-lg btn-block">
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="reg-info text-center">
+                <a onclick="ForgotPass()">Şifremi Unuttum</a>
+            </div>
+            <div class="reg-info text-center">
+                Hesabınız yok mu? <a href="/kayit-ol">Buradan kayıt olun.</a>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/umd/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script>
+        function logincontrol() {
+            var username = $('#username').val();
+            var password = $('#password').val();
+            var rememberme = $('#rememberme').is(':checked');
+            $.ajax({
+                type: 'POST',
+                url: '/Account/Login',
+                data: { username, password, rememberme },
+                async: false,
+                success: function (response) {
+                    if (response == 'True') {
+                        location.href = "/Anasayfa"
+                        return true;
+                    } else {
+                        $('.collapse').removeClass("collapse");
+                    }
+                }
+            });
+            return false;
+        }
+        function ForgotPass() {
+            Swal.fire({
+                title: "Şifre Yenileme",
+                text: "Yeni şifreniz e-posta adresinize gönderilecektir.",
+                input: 'email',
+                inputAttributes: {
+                    autocapitalize: 'on'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Onayla',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#1ca445',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: (email) => {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/Account/EMailCheck',
+                        data: { email },
+                        async: false,
+                        success: function (response) {
+                            if (response == 'True') {
+                                return;
+                            } else {
+                                Swal.showValidationMessage('Eposta adresi sistemde kayıtlı değil.')
+                            }
+                        }
+                    });
+                },
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/Account/ResetPassword',
+                        data: { email: result.value },
+                        async: false,
+                        success: function (response) {
+                            if (response == 'True') {
+                                Swal.fire({
+                                    text: `Yeni şifreniz mail adresinize gönderilmiştir.`,
+                                    confirmButtonColor: '#1ca445',
+                                    title: 'Şifre Yenileme'
+                                })
+                            } else {
+                                Swal.showValidationMessage('EPosta gönderilemedi.')
+                            }
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+</body>
+</html>

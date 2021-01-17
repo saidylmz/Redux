@@ -1,0 +1,130 @@
+﻿@model ICollection<Category>
+@using Redux.UI.MVC.Tools
+
+<div id="category" class="tab-pane active panel panel-default">
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">İsim</th>
+                    <th scope="col">Onaylı</th>
+                    <th scope="col">Onaysız</th>
+                    <th scope="col"><button data-toggle="modal" data-target="#AddCat" class="btn btn-primary">Yeni Ekle</button></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (Category item in Model)
+                    {
+                        <tr>
+                            <th scope="row">@item.ID</th>
+                            <td>@item.Name.Cut(16)</td>
+                            <td>@item.Mods.Count(x=>x.IsConfirm)</td>
+                            <td>@item.Mods.Count(x=>x.IsConfirm == false)</td>
+                            <td>
+                                <button data-toggle="modal" data-id="@item.ID" onclick="EditCat(@item.ID,'@item.Name', '@item.Image')" data-target="#EditCat" class="btn btn-info fa fa-edit"></button>
+                                <button onclick="DeleteCat(@item.ID,'@item.Name')" class="btn btn-danger fa fa-trash"></button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="AddCat" tabindex="-1" role="dialog" aria-labelledby="">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="myModalLabel">Kategori Ekle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            @using (Html.BeginForm("Category", "AdminHome", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>
+                            Kategori ismini giriniz
+                        </label>
+                        <input type="text" name="name" class="form-control" value="" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori resmi</label>
+                        <input type="file" name="file" class="form-control" required />
+                    </div>
+                    @Html.Hidden("option", Options.Add)
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="EditCat" tabindex="-1" role="dialog" aria-labelledby="">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background-color:#fafafa">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="myModalLabel">Kategori Düzenle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="text-white" aria-hidden="true">×</span></button>
+            </div>
+            @using (Html.BeginForm("Category", "AdminHome", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="modal-body" style="background-color:#20ba4e">
+                    <div class="form-group">
+                        <label class="text-white">
+                            Kategori ismi
+                        </label>
+                        <input type="text" name="name" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="text-white">Kategori resmi</label>
+                        <input type="file" name="file" class="form-control-file text-white" />
+                        <br />
+                        <img class="form-inline edit-image border border-secondary " width="80" height="80" src="" alt="">
+                    </div>
+                    @Html.Hidden("id", -1)
+                    @Html.Hidden("option", Options.Edit)
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    function EditCat(id,catname, im64) {
+        $('#EditCat input[name=name]').val(catname)
+        $('#EditCat input[name=id]').val(id)
+        $('.edit-image').attr("src", im64)
+    }
+        function DeleteCat(id, name) {
+            Swal.fire({
+                title: name + " isimli kategoriyi silmek istediğinize emin misiniz?",
+                showCancelButton: true,
+                confirmButtonText: 'Onayla',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#1ca445',
+                allowOutsideClick: () => !Swal.isLoading(),
+                showLoaderOnConfirm: true,
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type:'POST',
+                        url: "/AdminHome/Category",
+                        data: { id, option:@((int)Options.Delete) },
+                        success: function () {
+                            swal.fire({ text: "Kategori başarıyla silindi" , confirmButtonColor: '#1ca445' }).then(function () {
+                                location.reload();
+                            })
+                        }
+                    })
+                }
+            })
+        }
+</script>

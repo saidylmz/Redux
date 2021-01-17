@@ -1,0 +1,488 @@
+﻿@model Mod
+@{
+    ViewBag.Title = Model.Name;
+}
+
+<div id="content">
+
+    <div id="file" class="container">
+        <div class="clearfix">
+            @if (!Model.IsConfirm)
+            {
+                <div class="alert alert-danger">Dosya onaylanmamış. Onaylanana kadar senden başkası göremez.</div>
+            }
+            <h1>
+                @if (Model.IsFeatured)
+                {
+                    <i class="fa fa-star featured-star" title="Bu dosya önerilenlerde"></i>
+                }
+                <b>@Html.DisplayFor(x => x.Name)</b>
+                <label class="version">@Html.DisplayFor(x => x.Version, new { @class = "version" })</label>
+                @if (Model.User.UserName.EqualAny(User.Identity.Name) || Html.UserIsAdmin(User.Identity.Name))
+                {
+                    <span class="file-options">
+                        <a onclick="DeleteFile(@Model.ID)" class="file-unpublish" style="cursor:pointer">
+                            <span class="fa fa-remove"></span>
+                            Sil
+                        </a>
+                        <a href="/@Model.ToUrlString()/duzenle">
+                            <span class="fa fa-edit"></span>
+                            Dosya Düzenle
+                        </a>
+                        @if (Html.UserIsAdmin(User.Identity.Name))
+                        {
+                            <a style="cursor:pointer" onclick="Featured(@Model.ID)">
+                                <span class="fa fa-star"></span>
+                                @Html.QueryOutput(Model.IsFeatured, "Önerilenlerden çıkar", "Önerilenler ekle")
+                            </a>
+                        }
+                    </span>
+                }
+            </h1>
+        </div>
+        <div id="file-container" class="row">
+            <div class="col-sm-5 col-lg-4">
+                @if (Model.File.Contains(".."))
+                {
+                    <a href="/@Model.ToUrlString()/indir" class="btn btn-primary btn-download">
+                        <span class="fa fa-download"></span>
+                        İndir
+                    </a>
+                }
+                else
+                {
+                    <a target="_blank" href="/@Model.ToUrlString()/indir" class="btn btn-primary btn-download">
+                        <span class="fa fa-download"></span>
+                        İndir
+                    </a>
+                }
+
+                @if (User.Identity.IsAuthenticated && Model.User.UserName != User.Identity.Name && Model.IsConfirm)
+                {
+                    <div class="file-actions">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <button onclick="Like(@Model.ID);" class="file-like btn btn-o-primary btn-block @Html.QueryOutput(Model.Likes.Any(x => x.User.UserName.EqualAny(User.Identity.Name)),"active")">
+                                    <span class="item-inactive">
+                                        <span class="action-icon fa fa-thumbs-o-up"></span>
+                                    </span>
+                                    <span class="item-active">
+                                        <span class="action-icon fa fa-check-circle"></span>
+                                    </span>
+                                    <span class="action-label">Beğen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (User.Identity.IsAuthenticated && Html.UserIsAdmin(User.Identity.Name) && !Model.IsConfirm)
+                {
+                    <div class="file-actions">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <button onclick="FileConfirm(true, @Model.ID)" class="file-like btn btn-o-primary btn-block">
+                                    <span class="action-icon fa fa-check-circle"></span>
+                                    <span class="action-label">Onayla</span>
+                                </button>
+                            </div>
+                            <div class="col-xs-6">
+                                <button onclick="FileConfirm(false, @Model.ID)" class="file-like btn btn-outline-danger btn-block">
+                                    <span class="action-icon fa fa-times-circle"></span>
+                                    <span class="action-label">Reddet</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="user-panel row">
+                            <div class="col-xs-3">
+                                <a href="/kullanici/@Model.User.UserName">
+                                    <img class="img-responsive useravatar" style="width:100px; height:100px" src="@Model.User.AvatarSource()">
+                                </a>
+                            </div>
+                            <div class="col-xs-9">
+                                <a class="username" href="/kullanici/@Model.User.UserName">@Model.User.UserName</a>
+                                <br>
+                                <div class="user-social">
+                                    @if (!string.IsNullOrEmpty(Model.User.WebSite))
+                                    {
+                                        if (Model.User.WebSite.Contains("http"))
+                                        {
+                                            <a title="Website" target="_blank" href="@Model.User.WebSite"><span class="fa fa-home"></span></a>
+                                        }
+                                        else
+                                        {
+                                            <a title="Website" target="_blank" href="http://@Model.User.WebSite"><span class="fa fa-home"></span></a>
+                                        }
+
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.User.Steam))
+                                    {
+                                        <a title="Steam" target="_blank" href="http://steamcommunity.com/id/@Model.User.Steam"><span class="fa fa-steam-square"></span></a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.User.Instagram))
+                                    {
+                                        <a title="Instagram" target="_blank" href="https://www.instagram.com/@Model.User.Instagram"><span class="fa fa-instagram"></span></a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if (Model.User.Mods.Where(x => x.IsConfirm).Count() > 1)
+                {
+
+                    <div class="file-list">
+                        <div class="col-xs-12 hidden-xs">
+                            <h4 style="font-weight:400; font-size:20px"><a class="username" href="/kullanici/@Model.User.UserName">@Model.User.UserName</a> tarafından paylaşılanlar:</h4>
+                            @foreach (Mod item in Model.User.Mods.Where(x => x.IsConfirm))
+                            {
+                                <a href="/@item.ToUrlString()" class="file-list-obj panel panel-default" title="@item.Name">
+                                    <span class="preview empty">
+                                        <img title="@item.Name" class="img-responsive" width="500" height="333" src="@item.Medias.First(x => x.IsPhoto).URL">
+                                    </span>
+                                    <span class="details panel-body">
+                                        <span class="name" dir="ltr">@item.Name.Cut(24) @item.Version.Cut(12)</span>
+                                        <span class="author">Yükleyen: @item.User.UserName</span>
+                                        <span class="stats">
+                                            <span title="@item.Download İndirme">
+                                                <span class="fa fa-download"></span> @item.Download
+                                            </span> ·
+                                            <span title="@item.Likes.Count() Beğeni">
+                                                <span class="fa fa-thumbs-up"></span> @item.Likes.Count()
+                                            </span>
+                                            ·
+
+                                        </span>
+                                    </span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-sm-7 col-lg-8">
+                <div id="file-media">
+                    <div class="text-center">
+                        <a target="_blank" rel="gallery" class="thumbnail mfp-image cover-media fancybox" href="@Model.Medias.First(x => x.IsPhoto).URL"><img class="img-responsive" src="@Model.Medias.First(x => x.IsPhoto).URL" alt="1b04c8 gta5 2016 09 02 13 56 18"></a>
+                    </div>
+
+                    <div class="media-thumbnails row">
+                        @foreach (Media item in Model.Medias.Skip(1).Take(6))
+                        {
+                            if (item.IsPhoto)
+                            {
+                                <div class="col-xs-4 col-md-2">
+                                    <a target="_blank" rel="gallery" class="thumbnail mfp-image fancybox" href="@item.URL"><img class="img-responsive" src="@item.URL"></a>
+                                </div>
+                            }
+
+
+                        }
+                        @if (Model.Medias.Count > 7)
+                        {
+                            <div class="extra-media collapse">
+                                @foreach (Media item in Model.Medias.Skip(7))
+                                {
+                                    if (item.IsPhoto)
+                                    {
+                                        <div class="col-xs-4 col-md-2">
+                                            <a target="_blank" rel="gallery" class="thumbnail mfp-image fancybox" href="@item.URL"><img class="img-responsive" src="@item.URL"></a>
+                                        </div>
+                                    }
+
+
+                                }
+                            </div>
+                        }
+                    </div>
+                    @if (Model.Medias.Count > 7)
+                    {
+                        <a href="#more" class="media-limit btn btn-o-primary btn-block btn-sm">
+                            <span class="fa fa-angle-down"></span>
+                            Tüm resimleri görmek için genişlet
+                            <span class="fa fa-angle-down"></span>
+                        </a>
+                    }
+                </div>
+                <h3 class="clearfix" dir="auto">
+                    <div class="pull-left file-stats">
+                        <i class="fa fa-cloud-download pull-left download-icon"></i>
+                        <div class="file-stat file-downloads pull-left">
+                            <span class="num-downloads">@Model.Download</span>
+                            <label>İndirme</label>
+                        </div>
+                        <i class="fa fa-thumbs-o-up pull-left like-icon"></i>
+                        <div class="file-stat file-likes pull-left">
+                            <span class="num-likes">@Model.Likes.Count()</span>
+                            <label>Beğeni</label>
+                        </div>
+                    </div>
+
+                </h3>
+                <div class="mt-4 mb-4">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation">
+                            <a class="url-push active" href="#description_tab" aria-controls="description" role="tab" data-toggle="tab">
+                                <i class="fa fa-file-text-o"></i>
+                                Açıklama
+                            </a>
+                        </li>
+                        <li role="presentation" class="">
+                            <a class="url-push" href="#comments_tab" aria-controls="comments" role="tab" data-toggle="tab">
+                                <i class="fa fa-comments-o"></i>
+                                Yorumlar (@Model.Comments.Count)
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-4">
+                        <div role="tabpanel" class="tab-pane active" id="description_tab">
+                            <div class="panel panel-default" style="margin-top: 8px">
+                                <div class="panel-body">
+                                    <div class="file-description">
+                                        <span class="description-body " dir="auto" style="padding-bottom: 0px; white-space: pre-line;">
+                                            @Html.Raw(Model.Description)
+                                        </span>
+                                    </div>
+                                    <div id="file-dates">
+                                        <br>
+                                        <small>
+                                            <strong>İlk Yüklenme Zamanı:</strong>
+                                            @Model.CreatedDate.ToShortDateString()
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane   " id="comments_tab">
+                            <div id="comments">
+
+                                @if (Model.Comments.Count > 20)
+                                {
+                                    <div class="text-center">
+                                        <button onclick="OpenComments()" class="view-more btn btn-o-primary btn-block btn-sm">
+                                            Önceki yorumları göster
+                                        </button>
+                                    </div>
+                                }
+                                <ul class="media-list comments-list">
+                                    @{ Comment[] comments = Model.Comments.OrderByDescending(x => x.CreatedDate).Reverse().ToArray(); }
+                                    @for (int i = 0; i < comments.Length; i++)
+                                    {
+                                        Comment item = comments[i];
+                                        <li class="comment media @Html.QueryOutput(comments.Length > 20 && i < 20,"d-none")">
+                                            <div class="media-left">
+                                                <a href="/kullanici/@item.User.UserName"><img class="media-object" src="@item.User.AvatarSource()"></a>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-body">
+                                                        <div class="media-heading clearfix">
+                                                            <div class="pull-left flip" dir="auto">
+                                                                <a href="/kullanici/@item.User.UserName">@item.User.UserName</a>
+                                                                @if (Model.User.UserName.EqualAny(item.User.UserName))
+                                                                {
+
+                                                                    @:<label class="label label-primary">Sahip</label>
+                                                                }
+                                                                @if (Html.UserIsBanned(item.UserID))
+                                                                {
+                                                                    <label class="label label-warning">Banlı</label>
+                                                                }
+                                                            </div>
+                                                            <div class="pull-right flip">
+                                                            </div>
+                                                        </div>
+                                                        <div class="comment-text " dir="auto">
+                                                            <p>
+                                                                @Html.Raw(item.Content)
+                                                            </p>
+                                                        </div>
+                                                        <div class="media-details clearfix">
+                                                            <div class="row">
+
+                                                                <div class="col-md-8 text-left flip">
+                                                                    @if (User.Identity.IsAuthenticated && (item.User.UserName.EqualAny(User.Identity.Name) || Html.UserIsAdmin(User.Identity.Name)))
+                                                                    {
+                                                                        <a style="cursor:pointer" class="inline-icon-text" onclick="DeleteComment(@item.ID,@item.ModID)"><span class="fa fa-trash "></span>Sil</a>
+                                                                    }
+                                                                </div>
+
+                                                                <div class="col-md-4 text-right flip">@item.CreatedDate.ToShortDateString()</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                                @if (User.Identity.IsAuthenticated && (Model.IsConfirm || Html.UserIsAdmin(User.Identity.Name)))
+                                {
+                                    <div id="new-comment">
+                                        <ul class="media-list">
+                                            <li class="media">
+                                                <div class="media-left">
+                                                    <a>
+                                                        <img class="media-object useravatar" src="">
+                                                    </a>
+                                                </div>
+                                                <div class="media-body">
+                                                    <form action="/File/AddComment" method="post">
+                                                        <input name="utf8" type="hidden" value="✓">
+                                                        <input type="hidden" value="@Model.ID" name="file">
+                                                        <textarea class="form-control" placeholder="Yorumunuzu ekleyin..." dir="auto" name="comment" required></textarea>
+                                                        <div class="clearfix">
+                                                            <input type="submit" value="Yorumu Gönder" class="btn btn-primary submit-comment pull-left" data-loading-text="Yorum gönderiliyor...">
+                                                            <div class="user-rating-container pull-left">
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <label class="text-black-50">Onaylanmamış dosyalara yorum yapılamaz.</label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        function OpenComments() {
+            $('.d-none').removeClass("d-none")
+            $('.view-more').addClass("d-none")
+        }
+        function DeleteComment(id) {
+            Swal.fire({
+                icon: "question",
+                title: "Yorumunu silmek istediğine emin misin?",
+                showCancelButton: true,
+                confirmButtonText: 'Onayla',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#1ca445',
+                allowOutsideClick: () => !Swal.isLoading(),
+                showLoaderOnConfirm: true,
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "File/DeleteComment",
+                        data: { id },
+                        success: function (response) {
+                            if (Boolean(response))
+                                location.reload()
+                            else
+                                swal.fire({
+                                    icon: "error",
+                                    title: "Yorum silinemedi.",
+                                    confirmButtonText: 'Onayla',
+                                    confirmButtonColor: '#1ca445',
+                                })
+                        }
+                    })
+                }
+            })
+        }
+        function FileConfirm(confirm, id) {
+            $.ajax({
+                type: 'POST',
+                url: "/AdminHome/FileConfirm",
+                data: { confirm, id },
+                success: function () {
+                    if (Boolean(confirm))
+                        swal.fire({
+                            text: "Dosya onaylandı.", confirmButtonText: 'Tamam',
+                            confirmButtonColor: '#1ca445'
+                        }).then(() => {
+                            location.reload()
+                        })
+                    else
+                        swal.fire({
+                            text: "Dosya reddedildi.", confirmButtonText: 'Tamam',
+                            confirmButtonColor: '#1ca445'
+                        }).then(() => {
+                            location.reload()
+                        })
+                }
+            })
+        }
+        function Like(id) {
+            var now = $('.file-like').hasClass("active")
+            if (Boolean(now))
+                $('.file-like').removeClass("active")
+            else
+                $('.file-like').addClass("active")
+            $.ajax({
+                type: 'POST',
+                url: "/File/Like",
+                data: { id }
+            })
+        }
+        function Featured(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/AdminHome/Featured",
+                data: { id },
+                success: function () {
+                    location.reload()
+                }
+            })
+        }
+        $(document).ready(function () {
+            //FANCYBOX
+            //https://github.com/fancyapps/fancyBox
+            $(".fancybox").fancybox({
+                openEffect: "none",
+                closeEffect: "none",
+                padding: 0,
+                nextClick: true
+            });
+        });
+        function DeleteFile(id) {
+            Swal.fire({
+                icon: "question",
+                title: "Dosyayı silmek istediğine emin misin?",
+                text: "Sildikten sonra geri döndürümezsin.",
+                showCancelButton: true,
+                confirmButtonText: 'Onayla',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#1ca445',
+                allowOutsideClick: () => !Swal.isLoading(),
+                showLoaderOnConfirm: true,
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "File/DeleteFile",
+                        data: { id },
+                        success: function (response) {
+                            if (Boolean(response))
+                                location.href = "/Anasayfa"
+                            else
+                                swal.fire({
+                                    icon: "error",
+                                    title: "Dosya silinemedi.",
+                                    confirmButtonText: 'Tamam',
+                                    confirmButtonColor: '#1ca445',
+                                })
+                        }
+                    })
+                }
+            })
+        }
+
+    </script>
+}

@@ -1,0 +1,118 @@
+﻿@model User
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Kayıt | Redux</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/fontawesome5/css/all.min.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Custom/Account.css" rel="stylesheet" />
+</head>
+<body class="screen-cover register">
+    <div id="content">
+        <div id="login" class="content-sm">
+            <h2 class="light styled text-center">Kayıt Ol</h2>
+            <div class="panel panel-default panel-faded">
+                <div class="panel-body">
+                    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { onSubmit = "return registercontrol();" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-group">
+                            <label class="control-label" for="user_username">Kullanıcı Adı</label>
+                            <input required autofocus="autofocus" maxlength="64" onfocusout="usernamecontrol(this.value)" class="form-control input-lg" type="text" name="username" id="username">
+                            <label class="name-alert collapse small"><i class="fa fa-warning"></i> <label class="vmes">Bu kullanıcı adı zaten kayıtlı.</label> </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="user_email">Email</label>
+                            <input required autofocus="autofocus" onfocusout="emailcontrol(this.value)" class="form-control input-lg" type="email" name="email" id="email">
+                            <label class="collapse small mail-alert"><i class="fa fa-warning"></i> <label>Bu mail adresi zaten kayıtlı.</label></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="user_password">Şifre</label>
+                            <input minlength="6" maxlength="32" required autocomplete="off" onfocusout="passwordmatch()" class="form-control input-lg" type="password" name="password" id="password">
+                            <label class="collapse small pass-alert"><i class="fa fa-warning"></i> <label class="vmes"> Şifreler eşleşmiyor.</label></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="user_password">Şifreyi Onayla</label>
+                            <input required autocomplete="off" onfocusout="passwordmatch()" class="form-control input-lg" type="password" name="repassword" id="repassword">
+                            <label class="collapse small pass-alert"><i class="fa fa-warning"></i> <label>Şifreler eşleşmiyor.</label></label>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="commit" value="Kayıt Ol" class="btn btn-primary btn-lg btn-block login-btn" data-loading-text="Yükleniyor...">
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="reg-info text-center">
+                Zaten hesabınız var mı?
+                <div><a href="/giris-yap">Giriş Yap</a></div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/umd/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script>
+        function registercontrol() {
+            return document.getElementsByClassName("collapse").length > 3
+        }
+        function usernamecontrol(value) {
+            if (value.length == 0) return;
+            $('.name-alert').addClass("collapse")
+            if (value.length < 3) {
+                $('.name-alert .vmes').html("Kullanıcı adı en az 3 karakter olmalı.")
+                $('.name-alert').removeClass("collapse")
+                return;
+            }
+            $.ajax({
+                type: 'GET',
+                url: '/Account/UsernameCheck',
+                data: { username: value },
+                success: function (response) {
+                    if (response == 'True') {
+                        $('.name-alert .vmes').html("Bu kullanıcı adı zaten kayıtlı.")
+                        $('.name-alert').removeClass("collapse")
+                    } 
+                }
+            });
+        }
+        function emailcontrol(value) {
+            if (value.length == 0) return;
+            $.ajax({
+                type: 'GET',
+                url: '/Account/EMailCheck',
+                data: { email: value },
+                success: function (response) {
+                    if (response == 'True') {
+                        $('.mail-alert').removeClass("collapse")
+                    } else {
+                        $('.mail-alert').addClass("collapse")
+                    }
+                }
+            });
+        }
+        function passwordmatch() {
+            var p1 = $('#password').val();
+            var p2 = $('#repassword').val();
+            $('.pass-alert').addClass("collapse")
+            if (p1.length < 6) {
+                $('.pass-alert .vmes').html("Şifre en az 6 karakter olmalı.")
+                $('.pass-alert').removeClass("collapse")
+                return;
+            }
+            if (p1.length > 0 && p2.length > 0) {
+                if (p1 != p2) {
+                    $('.pass-alert .vmes').html("Şifreler eşleşmiyor.")
+                    $('.pass-alert').removeClass("collapse")
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+﻿@model User
+@{
+    ViewBag.Title = "Ayarlar";
+}
+
+<div class="content">
+    <div id="settings" class="container padded">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li class="">
+                                <a class="active" href="#account" data-toggle="tab">Hesap ve Profil</a>
+                            </li>
+                            <li>
+                                <a href="#password" data-toggle="tab">Şifre</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content col-sm-8">
+                <div id="password" class="tab-pane panel panel-default">
+                    <div class="panel-body">
+                        <div id="form-password" class="form-horizontal">
+                            <h4>Şifremi Değiştir</h4>
+                            <div class="form-group">
+                                <label for="input-current-password" class="col-sm-3 control-label">
+                                    Şu anki şifre
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="password" name="currentpassword" id="input-current-password" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-new-password" class="col-sm-3 control-label">
+                                    Yeni şifre
+                                </label>
+                                <div class="col-sm-9">
+                                    <input minlength="6" maxlength="30" type="password" name="new_password" id="input-new-password" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-confirm-password" class="col-sm-3 control-label">
+                                    Şifreyi onayla
+                                </label>
+                                <div class="col-sm-9">
+                                    <input maxlength="30" type="password" minlength="6" name="confirm_password" id="input-confirm-password" class="form-control">
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-sm-offset-3">
+                                    <button onclick="SavePassword()" class="btn btn-primary">Şifremi Değiştir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="account" class="tab-pane panel panel-default active">
+                    <div class="panel-body">
+                        @using (Html.BeginForm("Account", "Settings", FormMethod.Post, new { action = "/Settings/Account", @class = "form-horizontal", enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(x => x.ID)
+                            <h4>Hesap Detayları</h4>
+                            <div class="alert alert-danger alert-error collapse"></div>
+                            <div class="form-group">
+                                <label for="input-username" class="col-sm-3 control-label">Kullanıcı Adı</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="input-username" value="@Model.UserName" disabled>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-email" class="col-sm-3 control-label">E-mail adresi</label>
+                                <div class="col-sm-9">
+                                    @Html.TextBoxFor(x => x.Email, new { @required = "", @type = "email", @name = "email", @class = "form-control" })
+                                </div>
+                            </div>
+                            <hr>
+                            <h4>Diğer Online Hesaplar</h4>
+                            <div class="form-group">
+                                <label for="input-website" class="col-sm-3 control-label hidden-xs" title="Kişisel Website"><i class="fas fa-home"></i></label>
+                                <label for="input-website" class="control-label visible-xs">Kişisel Website</label>
+                                <div class="col-sm-9">
+                                    @Html.TextBoxFor(x => x.WebSite, new { @name = "WebSite", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-steam" class="col-sm-3 control-label fab fa-steam-square hidden-xs" title="Steam"></label>
+                                <label for="input-steam" class="control-label visible-xs">Steam</label>
+                                <div class="col-sm-9">
+                                    <div class="input-group" dir="ltr">
+                                        <span class="input-group-addon">steamcommunity.com/id/</span>
+                                        @Html.TextBoxFor(x => x.Steam, new { @name = "Steam", @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-instagram" class="col-sm-3 control-label fab fa-instagram hidden-xs" title="Instagram"></label>
+                                <label for="input-instagram" class="control-label visible-xs">Instagram</label>
+                                <div class="col-sm-9">
+                                    <div class="input-group" dir="ltr">
+                                        <span class="input-group-addon">instagram.com/</span>
+                                        @Html.TextBoxFor(x => x.Instagram, new { @name = "Instagram", @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <h4>Profil Fotoğrafı</h4>
+                            <div class="custom-avatar-form">
+                                <label for="input-avatar">Özel bir profil resmi yükle:</label>
+                                <small>(Sadece .jpg veya .png: En fazla 750 kb; 256x256 çözünürlüğü önerilir)</small>
+                                <div>
+                                    <img width="100" height="100" src="/@Model.AvatarSource()">
+                                    <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                            <br>
+                            <hr />
+                            <div>
+                                <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $('#file').change(function () {
+            var file = this.files[0];
+            if (Number(file.size / 1024).toFixed(0) > 751) {
+                this.type = "text";
+                this.type = "file";
+                Swal.fire({ title: "Hata", text: "En fazla 750 kb avatar seçilebilir.", confirmButtonColor: '#1ca445', confirmButtonText: 'Tamam', icon: 'error' });
+            }
+        })
+
+        function SavePassword() {
+            var current = document.getElementById("input-current-password").value
+            var newp = document.getElementById("input-new-password").value
+            var confp = document.getElementById("input-confirm-password").value
+            if (current == "" || newp == "" || confp == "")
+                Swal.fire({ title: "Hata", text: "Alanları boş bırakmayınız.", confirmButtonColor: '#1ca445', confirmButtonText: 'Tamam', icon: 'error' });
+
+            if (newp.length < 6 || confp.length < 6)
+                Swal.fire({ title: "Hata", text: "Şifre 6 karakterden kısa olmamalı.", confirmButtonColor: '#1ca445', confirmButtonText: 'Tamam', icon: 'error' });
+
+            if (newp != confp)
+                Swal.fire({ title: "Hata", text: "Şifreler eşleşmiyor.", confirmButtonColor: '#1ca445', confirmButtonText: 'Tamam', icon: 'error' });
+
+            $.ajax({
+                type: 'POST',
+                url: "/Settings/Password",
+                data: { current, newp },
+                success: function (response) {
+                    if (Boolean(response))
+                        swal.fire({
+                            title: "Şifre başarıyla değiştirildi.",
+                            confirmButtonText: 'Onayla',
+                            confirmButtonColor: '#1ca445',
+                        }).then(function () {
+                            location.href = "/ayarlar"
+                        })
+                    else
+                        swal.fire({
+                            icon: "error",
+                            title: "Şifre yanlış.",
+                            confirmButtonText: 'Tamam',
+                            confirmButtonColor: 'red',
+                        })
+                }
+            })
+        }
+    </script>
+}
+

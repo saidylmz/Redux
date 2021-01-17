@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Yönetim";
+}
+
+<div class="content">
+    <div id="settings" class="container padded">
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger text-center"><label>qq @ViewBag.Error</label></div>
+        }
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="#category" class="active" data-toggle="tab">Kategoriler</a></li>
+                            <li><a href="#confirm" data-toggle="tab">Onay Bekleyenler (<label style="color:red">@ViewBag.NotConfirm</label>)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content col-sm-8">
+                @Html.Action("_CategoryMenu")
+                @Html.Action("_PermissionMenu")
+            </div>
+        </div>
+    </div>
+</div>

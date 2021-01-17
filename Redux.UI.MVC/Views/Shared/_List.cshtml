@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Mod>
+<div class="file-list">
+    <div class="row">
+        @foreach (Mod item in Model)
+        {
+            <div class="col-xs-6 col-md-3">
+                <a href="/@item.ToUrlString()" class="file-list-obj panel panel-default" title="@item.Name">
+                    <span class="preview empty">
+                        <img title="@item.Name" class="img-responsive" src="/@item.Medias.First(x => x.IsPhoto).URL">
+                    </span>
+                    <span class="details panel-body">
+                        <span class="name" dir="ltr">@item.Name.Cut(24) @item.Version.Cut(12)</span>
+                        <span class="author">Yükleyen: @item.User.UserName</span>
+                        <span class="stats">
+                            <span title="@item.Download İndirme">
+                                <span class="fa fa-download"></span> @item.Download
+                            </span> ·
+                            <span title="@item.Likes.Count Beğeni">
+                                <span class="fa fa-thumbs-up"></span> @item.Likes.Count
+                            </span>
+                        </span>
+                    </span>
+                </a>
+            </div>
+        }
+
+    </div>
+    <div class="text-center">
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { Display = PagedListDisplayMode.IfNeeded, LinkToPreviousPageFormat = "«", LinkToNextPageFormat = "»", DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded, DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded })
+    </div>
+    
+</div>

@@ -1,0 +1,99 @@
+﻿@model IEnumerable<Mod>
+@{
+    ViewBag.Title = ViewBag.CatName;
+}
+
+@if (Model.Count(x => x.IsActive && x.IsConfirm) < 1)
+{
+    <div class="content">
+        <div class="container text-center text-black-50 mt-5">
+            <h2>Bu kategoride henüz paylaşım yapılmamış.</h2>
+        </div>
+    </div>
+}
+else
+{
+    <div class="content">
+        <div class="container">
+            <div class="category-sort clearfix">
+                <div class="dropdown">
+                    <button class="btn btn-default" data-toggle="dropdown">
+                        <strong>Tarih:</strong>
+                        @EnumExtensions.GetDescriptionFromEnumValue((Since)ViewBag.Since)
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        @foreach (Since item in Enum.GetValues(typeof(Since)).Cast<Since>())
+                        {
+                            <li class="dropdown-item">
+                                <a onclick="ChangeSince('@item')">
+                                    @EnumExtensions.GetDescriptionFromEnumValue(item)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-default" data-toggle="dropdown">
+                        <strong>Sıralama:</strong>&nbsp;
+                        <span class="fa fa-clock-o"></span>
+                        @EnumExtensions.GetDescriptionFromEnumValue((Sort)ViewBag.Sort)
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        @foreach (Sort item in Enum.GetValues(typeof(Sort)).Cast<Sort>())
+                        {
+                            <li class="dropdown-item">
+                                <a onclick="ChangeSort('@item')">
+                                    @EnumExtensions.GetDescriptionFromEnumValue(item)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            @Html.Partial("_List", Model.ToPagedList((int)ViewBag.Page, 1))
+        </div>
+    </div>
+
+    @section scripts{
+        <script type='text/javascript'>
+        $(document).on('click', '.pagination a', function () {
+            event.preventDefault()
+            ChangePage(Number(String(this.href).split('=').pop()))
+        });
+        function ChangeSince(snc) {
+            RedirectToPage({ since: snc })
+        }
+        function ChangeSort(srt) {
+            RedirectToPage({ sort: srt })
+        }
+        function ChangePage(page) {
+            RedirectToPage({ page })
+        }
+        function RedirectToPage(hash)
+        {
+            var urlstr = '/'+'@ViewBag.Cat';
+            if (@ViewBag.Since != @((int)Since.Hepsi) || hash.since != undefined) {
+                if (hash.since == undefined)
+                    hash.since = '@((Since)ViewBag.Since)';
+                urlstr = urlstr + "/" + hash.since;
+            }
+            if (@ViewBag.Sort != @((int)Sort.Yeniler)|| hash.sort != undefined) {
+                if (hash.sort == undefined)
+                    hash.sort = '@((Sort)ViewBag.Sort)';
+                urlstr = urlstr + "/" + hash.sort;
+            }
+            if (@ViewBag.Page > 1 ||  hash.page != undefined) {
+                if (hash.page == undefined)
+                    hash.page = @ViewBag.Page;
+                urlstr = urlstr + "/" + hash.page;
+            }
+            location.href = urlstr;
+        }
+        </script>
+    }
+
+
+}
+

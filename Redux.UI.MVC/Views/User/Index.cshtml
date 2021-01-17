@@ -1,0 +1,204 @@
+﻿@model User
+@{
+    ViewBag.Title = Model.UserName;
+}
+
+<div id="content">
+    <div id="profile" data-user-id="@Model.ID">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-md-4">
+                    <div class="user-panel panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <a href="/kullanici/@Model.UserName">
+                                        <img class="img-responsive" style="width:100px; height:100px" src="/@Model.AvatarSource()">
+                                    </a>
+                                </div>
+                                <div class="col-xs-9">
+                                    <a class="username" href="/kullanici/@Model.UserName">@Model.UserName</a>
+                                    <br>
+                                    <div class="user-social">
+                                        @if (!string.IsNullOrEmpty(Model.WebSite))
+                                        {
+                                            if (Model.WebSite.Contains("http"))
+                                            {
+                                                <a title="Website" target="_blank" href="@Model.WebSite"><span class="fa fa-home"></span></a>
+                                            }
+                                            else
+                                            {
+                                                <a title="Website" target="_blank" href="http://@Model.WebSite"><span class="fa fa-home"></span></a>
+                                            }
+
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.Steam))
+                                        {
+                                            <a title="Steam" target="_blank" href="http://steamcommunity.com/id/@Model.Steam"><span class="fa fa-steam-square"></span></a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.Instagram))
+                                        {
+                                            <a title="Instagram" target="_blank" href="https://www.instagram.com/@Model.Instagram"><span class="fa fa-instagram"></span></a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default" dir="auto">
+                        <div class="panel-body">
+                            <div class="user-stats">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <span class="stat-icon fa fa-thumbs-o-up"></span>
+                                        <span class="stat-label">
+                                            @Model.Likes.Count dosya beğenildi
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <span class="stat-icon fa fa-comments-o"></span>
+                                        <span class="stat-label">
+                                            @Model.Comments.Count yorum
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <span class="stat-icon fa fa-upload"></span>
+                                        <span class="stat-label">
+                                            @Model.Mods.Count yükleme
+                                        </span>
+                                    </div>
+
+                                    <div class="col-xs-6">
+                                        <span class="stat-icon fa fa-download"></span>
+                                        <span class="stat-label">
+                                            @Model.Mods.Sum(x => x.Download) indirme
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Mods.Where(x => x.IsActive && x.IsConfirm).Count() > 0)
+                {
+                    <div class="col-sm-6 col-md-4 file-list">
+                        @{
+                            Mod file = @Model.Mods.OrderByDescending(x => x.Download).First();
+                        }
+                        <h3 class="no-margin-top">En Çok İndirilen</h3>
+                        <a href="/@file.ToUrlString()" class="file-list-obj panel panel-default" title="@file.Name">
+                            <span class="preview empty">
+                                <img title="@file.Name" class="img-responsive" src="/@file.Medias.First(x=>x.IsPhoto).URL">
+                            </span>
+                            <span class="details panel-body">
+                                <span class="name" dir="ltr">@file.Name.Cut(24) @file.Version</span>
+                                <span class="author">Yükleyen: @file.User.UserName</span>
+                                <span class="stats">
+                                    <span title="@file.Download İndirme">
+                                        <span class="fa fa-download"></span> @file.Download
+                                    </span> ·
+                                    <span title="@file.Likes.Count Beğeni">
+                                        <span class="fa fa-thumbs-up"></span> @file.Likes.Count
+                                    </span>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-4 file-list">
+                        @{
+                            file = @Model.Mods.OrderByDescending(x => x.Likes.Count).First();
+                        }
+                        <h3 class="no-margin-top">En Çok Beğenilen</h3>
+                        <a href="/@file.ToUrlString()" class="file-list-obj panel panel-default" title="@file.Name">
+                            <span class="preview empty">
+                                <img title="@file.Name" class="img-responsive" src="/@file.Medias.First(x=>x.IsPhoto).URL">
+                            </span>
+                            <span class="details panel-body">
+                                <span class="name" dir="ltr">@file.Name.Cut(24) @file.Version</span>
+                                <span class="author">Yükleyen: @file.User.UserName</span>
+                                <span class="stats">
+                                    <span title="@file.Download İndirme">
+                                        <span class="fa fa-download"></span> @file.Download
+                                    </span> ·
+                                    <span title="@file.Likes.Count Beğeni">
+                                        <span class="fa fa-thumbs-up"></span> @file.Likes.Count
+                                    </span>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                }
+
+            </div>
+            @if (Model.Mods.Where(x => x.IsActive && x.IsConfirm).Count() > 0)
+            {
+                <div class="row">
+                    <div class="file-list col-sm-5">
+                        <h3 class="latest-files">
+                            Son Dosyalar
+                            <span><a href="/kullanici/@Model.UserName/dosyalar">(Genişlet)</a></span>
+                        </h3>
+                        <div class="row">
+                            @foreach (Mod item in Model.Mods.Where(x => x.IsConfirm && x.IsActive).OrderByDescending(x => x.CreatedDate).Take(8))
+                            {
+                                <div class="col-xs-6 col-sm-12 col-md-6">
+                                    <a href="/@item.ToUrlString()" class="file-list-obj panel panel-default" title="@item.Name">
+                                        <span class="preview empty">
+                                            <img title="@item.Name" class="img-responsive" src="/@item.Medias.First(x => x.IsPhoto).URL">
+                                        </span>
+                                        <span class="details panel-body">
+                                            <span class="name" dir="ltr">@item.Name</span>
+                                            <span class="author">Yükleyen: @item.User.UserName</span>
+                                            <span class="stats">
+                                                <span title="@item.Download İndirme">
+                                                    <span class="fa fa-download"></span> @item.Download
+                                                </span> ·
+                                                <span title="@item.Likes.Count Beğeni">
+                                                    <span class="fa fa-thumbs-up"></span> @item.Likes.Count
+                                                </span>
+                                                ·
+                                            </span>
+                                        </span>
+                                    </a>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                    <div id="comments" class="col-sm-7">
+                        <ul class="media-list comments-list" style="display: block;">
+                            @foreach (Comment item in Model.Comments.OrderByDescending(x => x.CreatedDate).Take(8))
+                            {
+                                <li id="comment-@item.ID" class="comment media " data-comment-id="@item.ID" data-username="@item.User.UserName" data-mentions="">
+                                    <div class="media-left">
+                                        <a href="/kullanici/@Model.UserName"><img class="media-object" width="100" height="100" src="/@Model.AvatarSource()"></a>
+                                    </div>
+                                    <div class="media-body">
+                                        <div class="panel panel-default">
+                                            <div class="panel-body">
+                                                <div class="media-heading clearfix">
+                                                    <div class="pull-left flip" dir="auto">
+                                                        <a href="/kullanici/@Model.UserName">@Model.UserName</a>
+                                                        »
+                                                        <a href="/@item.Mod.ToUrlString()">@item.Mod.Name</a>
+                                                    </div>
+                                                    <div class="pull-right flip">
+                                                    </div>
+                                                </div>
+                                                <div class="comment-text " style="" dir="auto"><p>@item.Content</p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

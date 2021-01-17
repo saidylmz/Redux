@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Category>
+
+
+@foreach (Category item in Model.Take(7))
+{
+    <li class="@item.Name ">
+        <a href="/@item.ToUrlString()" class="text-center">
+            <img class="icon-category" src="/@item.Image" />
+            <span class="label-border"></span>
+            <span class="label-category ">
+                <span>@item.Name</span>
+            </span>
+        </a>
+    </li>
+}
+@if (Model.Count() > 7)
+{
+    <li id="more-dropdown" class="">
+        <a href="#more" data-toggle="dropdown" aria-expanded="true" data->
+            <span class="icon-category"><img src="~/Content/Images/more.png" /></span>
+            <span class="label-border"></span>
+            <span class="label-category ">
+                <span>DAHA FAZLA</span>
+            </span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+            <ul class="more-down">
+                @foreach (Category item in Model.Skip(7))
+                {
+                    <li class="dropdown-item">
+                        <a href="/@item.ToUrlString()">
+                            <span class="fa fa-dot-circle"></span>
+                            @item.Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </li>
+}

@@ -1,0 +1,65 @@
+﻿@model ICollection<Mod>
+
+<div id="confirm" class="tab-pane panel panel-default">
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Dosya ismi</th>
+                    <th scope="col">Yayınlayan</th>
+                    <th scope="col">Onay | Red</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (Mod item in Model.Where(x=>x.IsConfirm is false))
+                    {
+                        <tr>
+                            <th scope="row">@item.ID</th>
+                            <td><a href="/@item.ToUrlString()">@item.Name.Cut(32)</a></td>
+                            <td><a href="/kullanici/@item.User.UserName">@item.User.UserName</a></td>
+                            <td>
+                                <button onclick="Confirm(@item.ID,true)" class="btn btn-success fa fa-check"></button>
+                                <button onclick="Confirm(@item.ID,false)" class="btn btn-danger fa fa-times-circle"></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>Onay bekleyen dosya yok!</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        function Confirm(id, confirm) {
+            $.ajax({
+                type: 'POST',
+                url: "AdminHome/FileConfirm",
+                data: { confirm, id },
+                success: function () {
+                    if (Boolean(confirm))
+                        swal.fire({
+                            text: "Dosya onaylandı.", confirmButtonText: 'Tamam',
+                            confirmButtonColor: '#1ca445'
+                        }).then(() => {
+                            location.reload()
+                        })
+                    else
+                        swal.fire({
+                            text: "Dosya reddedildi.", confirmButtonText: 'Tamam',
+                            confirmButtonColor: '#1ca445'
+                        }).then(() => {
+                            location.reload()
+                        })
+                }
+            })
+        }
+    </script>

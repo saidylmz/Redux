@@ -1,0 +1,10 @@
+﻿@model IEnumerable<Mod>
+@{
+    ViewBag.Title = Model.First().User.UserName + " kullanıcısının dosyaları | Redux.com";
+}
+    <div class="content container">
+        <h2>@Model.First().User.UserName kullanıcısının dosyaları</h2>
+
+        @Html.Partial("_List", Model.ToPagedList(1, Model.Count()))
+    </div>
+

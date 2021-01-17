@@ -1,0 +1,139 @@
+﻿@model IEnumerable<Mod>
+@{
+    ViewBag.Title = "Anasayfa";
+}
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div id="featured" class="col-md-8">
+                <h3>
+                    Vitrindeki Dosyalar
+                </h3>
+                <div class="row">
+                    <div class="col-sm-9">
+                        @if (Model != null)
+                        {
+                            foreach (var item in Model.Where(x => x.IsFeatured))
+                            {
+                                <a href="/@item.ToUrlString()" class="main" title="@item.Name">
+                                    <div>
+                                        <span class="image-container">
+                                            <span class="details">
+                                                <span class="filename">@item.Name</span>
+                                                <span class="author">Yükleyen: @item.User.UserName</span>
+                                            </span>
+                                            <img width="550" height="275" src="@item.Medias.First(x=>x.IsPhoto).URL" alt="Eb2d72 dsadwadwa">
+                                        </span>
+                                    </div>
+                                </a>
+                            }
+                        }
+                    </div>
+                    <div class="col-sm-3 hidden-xs">
+                        <ul>
+                            @if (Model != null)
+                            {
+                                foreach (Mod item in Model.Where(x => x.IsFeatured))
+                                {
+                                    <li class="smallpic">
+                                        <a href="/@item.ToUrlString()" class="clearfix" title="@item.Name">
+                                            <span class="filename-container">
+                                                <span class="filename">@item.Name</span>
+                                            </span>
+                                            <img src="@item.Medias.First(x=>x.IsPhoto).URL" style="object-fit:cover">
+                                        </a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="file-list col-md-6">
+                <h3>
+                    Son Dosyalar
+                </h3>
+                <div class="row">
+                    @foreach (Mod item in Model.OrderByDescending(x => x.CreatedDate).Take(8))
+                    {
+                        <div class="col-xs-6">
+                            <a href="/@item.ToUrlString()" class="file-list-obj panel panel-default" title="@item.Name">
+                                <span class="preview empty">
+                                    <img title="@item.Name" class="img-responsive" src="@item.Medias.First(x=>x.IsPhoto).URL">
+                                </span>
+                                <span class="details panel-body">
+                                    <span class="name" dir="ltr">@item.Name.Cut(24) @item.Version.Cut(12)</span>
+                                    <span class="author">Yükleyen: @item.User.UserName</span>
+                                    <span class="stats">
+                                        <span title="@item.Download İndirme">
+                                            <span class="fa fa-download"></span> @item.Download
+                                        </span> ·
+                                        <span title="@item.Likes.Count Beğeni">
+                                            <span class="fa fa-thumbs-up"></span> @item.Likes.Count
+                                        </span>
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="file-list col-md-6">
+                <h3>
+                    Bu Hafta En Çok İndirilenler
+                </h3>
+                <div class="row">
+                    @foreach (Mod item in Model.Where(x=> (DateTime.Now - x.CreatedDate).TotalDays < 8).OrderByDescending(x => x.Download))
+                    {
+                        <div class="col-xs-6">
+                            <a href="/@item.ToUrlString()" class="file-list-obj panel panel-default" title="@item.Name">
+                                <span class="preview empty">
+                                    <img title="@item.Name" class="img-responsive" src="@item.Medias.First(x=>x.IsPhoto).URL">
+                                </span>
+                                <span class="details panel-body">
+                                    <span class="name" dir="ltr">@item.Name.Cut(24) @item.Version.Cut(12)</span>
+                                    <span class="author">Yükleyen: @item.User.UserName</span>
+                                    <span class="stats">
+                                        <span title="@item.Download İndirme">
+                                            <span class="fa fa-download"></span> @item.Download
+                                        </span> ·
+                                        <span title="@item.Likes.Count Beğeni">
+                                            <span class="fa fa-thumbs-up"></span> @item.Likes.Count
+                                        </span>
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        var slideIndex = 0;
+        showSlides();
+
+        function showSlides() {
+            var i;
+            var mains = document.getElementsByClassName("main");
+            var smalls = document.getElementsByClassName("smallpic");
+            for (var i = 0; i < mains.length; i++) {
+                mains[i].classList.remove("active");
+                smalls[i].classList.remove("active");
+            }
+            mains[slideIndex].classList.add("active");
+            smalls[slideIndex].classList.add("active");
+            slideIndex++;
+            if (slideIndex >= mains.length) { slideIndex = 0 }
+            setTimeout(showSlides, 5000);
+        }
+    </script>
+}

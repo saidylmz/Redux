@@ -1,0 +1,107 @@
+﻿body.screen-cover {
+    background-color: #333;
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-image: url('../Images/accountscreen.jpg');
+    font-size:14px;
+}
+
+    body.screen-cover #content {
+        background: 0 0;
+        padding-top: 0;
+    }
+
+#content {
+    padding-top: 40px;
+    padding-bottom: 15px;
+    min-height: 400px;
+    background: #f9f9f9;
+}
+.content-sm {
+    width: 300px;
+    margin: 0 auto;
+    padding-top: 25px;
+}
+h1.styled, h2.styled {
+    font-size: 48px;
+}
+
+h2.light {
+    color: #f7f7f7;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #ccc;
+}
+
+.styled {
+    font-family: signpainter,Helvetica,sans-serif;
+}
+
+.panel.panel-faded {
+    background: rgba(255,255,255,.8);
+}
+
+.panel-default {
+    border-color: #ddd;
+}
+
+.panel {
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+.panel-body {
+    padding: 15px;
+}
+.reg-info {
+    color: #fff;
+    margin-bottom: 20px;
+}
+.alert-danger {
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    color: #a94442;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-warning {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    color: #8a6d3b;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #20ba4e;
+    border-color: #1ca445;
+}
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active {
+        color: #fff;
+        background-color: #198e3c;
+        border-color: #13702f;
+    }
+.reg-info a {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: underline;
+}
+    .reg-info a:hover {
+        color: #f7f7f7;
+        text-decoration: none;
+    }
+label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
