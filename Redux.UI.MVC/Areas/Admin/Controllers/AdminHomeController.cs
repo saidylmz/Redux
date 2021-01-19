@@ -74,6 +74,7 @@ namespace Redux.UI.MVC.Areas.Admin.Controllers
                         }
                         ncat.Image = "../Files/Category/" + filename;
                         img.Save(path);
+                        categoryService.Update(ncat)
                         break;
                     case Options.Edit:
                         if (categoryService.GetAll().Any(x => x.ID != id && x.Name.ToLower() == name)) ViewBag.Error = "Aynı isimde farklı kategori mevcut.";
